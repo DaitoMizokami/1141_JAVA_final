@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖書館書籍管理系統</title>
+    <!DOCTYPE html>
+    <html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>圖書館書籍管理系統</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'Hiragino Sans', sans-serif;
+                background: #faf9f7;
+                min-height: 100vh;
+                padding: 40px 20px;
+                color: #4a4a4a;
+            }
+
+            .container {
+                max-width: 1000px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 2px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                overflow: hidden;
+            }
+
+            header {
+                background: white;
+                border-bottom: 1px solid #e8e8e8;
+                padding: 50px 40px;
+                text-align: center;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+                margin-bottom: 12px;
+                font-weight: 300;
+                letter-spacing: 0.5px;
+                color: #3a3a3a;
+            }
+
+            header p {
+                font-size: 0.95em;
+                color: #999;
+                font-weight: 300;
+                letter-spacing: 0.3px;
+            }
+
+            .content {
+                padding: 40px;
+            }
+
+            .form-section {
+                background: white;
+                padding: 30px;
+                margin-bottom: 40px;
+                border: 1px solid #e8e8e8;
+                border-radius: 2px;
+            }
+
+            .form-section h2 {
+                color: #3a3a3a;
+                margin-bottom: 25px;
+                font-size: 1.2em;
+                font-weight: 400;
+                border-bottom: 1px solid #f0f0f0;
+                padding-bottom: 15px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 8px;
+                color: #666;
+                font-weight: 400;
+                font-size: 0.95em;
+                letter-spacing: 0.2px;
+            }
+
+            input, select, textarea {
+                width: 100%;
+                padding: 12px 12px;
+                border: 1px solid #d9d9d9;
+                border-radius: 2px;
+                font-size: 0.95em;
+                font-family: inherit;
+                transition: border-color 0.2s, background-color 0.2s;
+                background: #fafafa;
+                color: #3a3a3a;
+            }
+
+            input:focus, select:focus, textarea:focus {
+                outline: none;
+                border-color: #999;
+                background: white;
+                box-shadow: none;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+
+            @media (max-width: 768px) {
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            button {
+                background: #3a3a3a;
+                color: white;
+                padding: 11px 24px;
+                border: none;
+                border-radius: 2px;
+                font-size: 0.95em;
+                cursor: pointer;
+                transition: background-color 0.2s, opacity 0.2s;
+                font-weight: 400;
+                letter-spacing: 0.3px;
+            }
+
+            button:hover {
+                background: #5a5a5a;
+                opacity: 0.95;
+            }
+
+            button:active {
+                background: #2a2a2a;
+            }
+
+            button.cancel {
+                background: #999;
+                margin-left: 10px;
+            }
+
+            button.cancel:hover {
+                background: #bbb;
+            }
+
+            button.delete {
+                background: #d4a5a0;
+                padding: 8px 12px;
+                font-size: 0.85em;
+            }
+
+            button.delete:hover {
+                background: #e8bfb8;
+            }
+
+            button.edit {
+                background: #b8a88d;
+                color: white;
+                padding: 8px 12px;
+                font-size: 0.85em;
+            }
+
+            button.edit:hover {
+                background: #d4c4ad;
+            }
+
+            .button-group {
+                display: flex;
+                gap: 12px;
+                margin-top: 25px;
+            }
+
+            .table-section {
+                margin-top: 40px;
+            }
+
+            .table-section h2 {
+                color: #3a3a3a;
+                margin-bottom: 25px;
+                font-size: 1.2em;
+                font-weight: 400;
+                border-bottom: 1px solid #f0f0f0;
+                padding-bottom: 15px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                background: white;
+            }
+
+            thead {
+                background: #fafafa;
+                border-bottom: 1px solid #e8e8e8;
+            }
+
+            th {
+                padding: 16px 12px;
+                text-align: left;
+                color: #666;
+                font-weight: 500;
+                font-size: 0.9em;
+                letter-spacing: 0.3px;
+            }
+
+            td {
+                padding: 16px 12px;
+                border-bottom: 1px solid #f0f0f0;
+                color: #4a4a4a;
+                font-size: 0.95em;
+            }
+
+            tbody tr:hover {
+                background: #fafafa;
+            }
+
+            .status-badge {
+                display: inline-block;
+                padding: 6px 12px;
+                border-radius: 2px;
+                font-size: 0.85em;
+                font-weight: 400;
+                letter-spacing: 0.3px;
+            }
+
+            .status-available {
+                background: #e8f5e9;
+                color: #558b2f;
+            }
+
+            .status-checked-out {
+                background: #fce4ec;
+                color: #c2185b;
+            }
+
+            .action-buttons {
+                display: flex;
+                gap: 8px;
+            }
+
+            .message {
+                padding: 14px 16px;
+                border-radius: 2px;
+                margin-bottom: 25px;
+                display: none;
+                animation: slideIn 0.3s ease-out;
+                border-left: 4px solid;
+            }
+
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .message.success {
+                background: #f1f8f6;
+                color: #558b2f;
+                border-left-color: #558b2f;
+                display: block;
+            }
+
+            .message.error {
+                background: #fdf7f8;
+                color: #c2185b;
+                border-left-color: #c2185b;
+                display: block;
+            }
+
+            .loading {
+                text-align: center;
+                color: #999;
+                font-size: 1em;
+                padding: 40px;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 60px 40px;
+                color: #bbb;
+            }
+
+            .empty-state-icon {
+                font-size: 3em;
+                margin-bottom: 20px;
+                opacity: 0.5;
+            }
+
+            .empty-state h3 {
+                color: #999;
+                font-weight: 400;
+                font-size: 1.1em;
+                margin-bottom: 8px;
+            }
+
+            .empty-state p {
+                color: #ccc;
+                font-size: 0.9em;
+            }
+
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-bottom: 40px;
+            }
+
+            .stat-card {
+                background: white;
+                color: #3a3a3a;
+                padding: 25px;
+                border-radius: 2px;
+                text-align: center;
+                border: 1px solid #e8e8e8;
+                transition: border-color 0.2s;
+            }
+
+            .stat-card:hover {
+                border-color: #d9d9d9;
+            }
+
+            .stat-card .number {
+                font-size: 2.2em;
+                font-weight: 300;
+                margin-bottom: 10px;
+                color: #3a3a3a;
+            }
+
+            .stat-card .label {
+                font-size: 0.9em;
+                color: #999;
+                font-weight: 400;
+                letter-spacing: 0.2px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>圖書館管理系統</h1>
+                <p>Book Management Service</p>
+            </header>
+
+            <div class="content">
+                <!-- 訊息提示 -->
+                <div id="message" class="message"></div>
+
+                <!-- 統計卡片 -->
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="number" id="totalBooks">0</div>
+                        <div class="label">總書籍數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="availableBooks">0</div>
+                        <div class="label">可借閱書籍</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="checkedOutBooks">0</div>
+                        <div class="label">已借出書籍</div>
+                    </div>
+                </div>
+
+                <!-- 表單區域 -->
+                <div class="form-section">
+                    <h2 id="formTitle">新增書籍</h2>
+                    <form id="bookForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="title">書名 *</label>
+                                <input type="text" id="title" name="title" required placeholder="輸入書名">
+                            </div>
+                            <div class="form-group">
+                                <label for="author">作者 *</label>
+                                <input type="text" id="author" name="author" required placeholder="輸入作者">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">狀態 *</label>
+                            <select id="status" name="status" required>
+                                <option value="">-- 選擇狀態 --</option>
+                                <option value="AVAILABLE">可借閱</option>
+                                <option value="CHECKED_OUT">已借出</option>
+                            </select>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" id="submitBtn">新增書籍</button>
+                            <button type="button" class="cancel" id="cancelBtn" style="display:none;">取消編輯</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 書籍列表區域 -->
+                <div class="table-section">
+                    <h2>書籍列表</h2>
+                    <div id="loadingMessage" class="loading" style="display:none;">加載中...</div>
+                    <table id="booksTable" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>書名</th>
+                                <th>作者</th>
+                                <th>狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="booksTableBody">
+                        </tbody>
+                    </table>
+                    <div id="emptyState" class="empty-state" style="display:none;">
+                        <div class="empty-state-icon">∼</div>
+                        <h3>暫無書籍</h3>
+                        <p>請在上方新增書籍</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const API_BASE = 'http://localhost:8081/api/books';
+            let currentEditId = null;
+
+            // 初始化
+            document.addEventListener('DOMContentLoaded', () => {
+                loadBooks();
+                document.getElementById('bookForm').addEventListener('submit', handleFormSubmit);
+                document.getElementById('cancelBtn').addEventListener('click', resetForm);
+            });
+
+            // 載入書籍列表
+            async function loadBooks() {
+                const loadingMsg = document.getElementById('loadingMessage');
+                const table = document.getElementById('booksTable');
+                const emptyState = document.getElementById('emptyState');
+                const tbody = document.getElementById('booksTableBody');
+
+                loadingMsg.style.display = 'block';
+                table.style.display = 'none';
+                emptyState.style.display = 'none';
+
+                try {
+                    const response = await fetch(API_BASE);
+                    if (!response.ok) throw new Error('載入失敗');
+
+                    const books = await response.json();
+                
+                    // 更新統計
+                    updateStats(books);
+
+                    tbody.innerHTML = '';
+                    if (books.length === 0) {
+                        emptyState.style.display = 'block';
+                    } else {
+                        books.forEach(book => {
+                            const row = createTableRow(book);
+                            tbody.appendChild(row);
+                        });
+                        table.style.display = 'table';
+                    }
+                } catch (error) {
+                    showMessage('載入書籍列表失敗: ' + error.message, 'error');
+                } finally {
+                    loadingMsg.style.display = 'none';
+                }
+            }
+
+            // 建立表格行
+            function createTableRow(book) {
+                const row = document.createElement('tr');
+                const statusClass = book.status === 'AVAILABLE' ? 'status-available' : 'status-checked-out';
+                const statusText = book.status === 'AVAILABLE' ? '可借閱' : '已借出';
+
+                row.innerHTML = `
+                    <td>${book.id}</td>
+                    <td>${escapeHtml(book.title)}</td>
+                    <td>${escapeHtml(book.author)}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="edit" onclick="editBook(${book.id}, '${escapeHtml(book.title)}', '${escapeHtml(book.author)}', '${book.status}')">編輯</button>
+                            <button class="delete" onclick="deleteBook(${book.id})">刪除</button>
+                        </div>
+                    </td>
+                `;
+                return row;
+            }
+
+            // 編輯書籍
+            function editBook(id, title, author, status) {
+                currentEditId = id;
+                document.getElementById('title').value = title;
+                document.getElementById('author').value = author;
+                document.getElementById('status').value = status;
+                document.getElementById('formTitle').textContent = '編輯書籍';
+                document.getElementById('submitBtn').textContent = '更新書籍';
+                document.getElementById('cancelBtn').style.display = 'inline-block';
+                document.getElementById('title').focus();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // 重置表單
+            function resetForm() {
+                document.getElementById('bookForm').reset();
+                currentEditId = null;
+                document.getElementById('formTitle').textContent = '新增書籍';
+                document.getElementById('submitBtn').textContent = '新增書籍';
+                document.getElementById('cancelBtn').style.display = 'none';
+            }
+
+            // 表單提交
+            async function handleFormSubmit(e) {
+                e.preventDefault();
+
+                const title = document.getElementById('title').value.trim();
+                const author = document.getElementById('author').value.trim();
+                const status = document.getElementById('status').value;
+
+                if (!title || !author || !status) {
+                    showMessage('請填寫所有欄位', 'error');
+                    return;
+                }
+
+                try {
+                    let response;
+                    if (currentEditId) {
+                        // 更新
+                        response = await fetch(`${API_BASE}/${currentEditId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title, author, status })
+                        });
+                    } else {
+                        // 新增
+                        response = await fetch(API_BASE, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title, author, status })
+                        });
+                    }
+
+                    if (!response.ok) throw new Error(`操作失敗 (HTTP ${response.status})`);
+
+                    const result = await response.json();
+                    showMessage(currentEditId ? '書籍已更新' : '書籍已新增', 'success');
+                    resetForm();
+                    loadBooks();
+                } catch (error) {
+                    showMessage('操作失敗: ' + error.message, 'error');
+                }
+            }
+
+            // 刪除書籍
+            async function deleteBook(id) {
+                if (!confirm('確定要刪除此書籍嗎？')) return;
+
+                try {
+                    const response = await fetch(`${API_BASE}/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (!response.ok) throw new Error(`刪除失敗 (HTTP ${response.status})`);
+
+                    showMessage('書籍已刪除', 'success');
+                    loadBooks();
+                } catch (error) {
+                    showMessage('刪除失敗: ' + error.message, 'error');
+                }
+            }
+
+            // 更新統計資訊
+            function updateStats(books) {
+                const total = books.length;
+                const available = books.filter(b => b.status === 'AVAILABLE').length;
+                const checkedOut = books.filter(b => b.status === 'CHECKED_OUT').length;
+
+                document.getElementById('totalBooks').textContent = total;
+                document.getElementById('availableBooks').textContent = available;
+                document.getElementById('checkedOutBooks').textContent = checkedOut;
+            }
+
+            // 顯示訊息
+            function showMessage(text, type) {
+                const msgEl = document.getElementById('message');
+                msgEl.textContent = text;
+                msgEl.className = `message ${type}`;
+                setTimeout(() => {
+                    msgEl.style.display = 'none';
+                }, 4000);
+            }
+
+        
+            function escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            }
+        </script>
+    </body>
+    </html>
+

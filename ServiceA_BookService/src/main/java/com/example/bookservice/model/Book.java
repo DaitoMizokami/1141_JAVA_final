@@ -4,6 +4,9 @@ public class Book extends LibraryItem {
     private String author;
     private String status; // AVAILABLE or CHECKED_OUT
 
+    // no-arg constructor for deserialization
+    public Book() { super(); }
+
     public Book(int id, String title, String author, String status) {
         super(id, title);
         this.author = author;
