@@ -10,7 +10,8 @@ We are building a microservice-based application using Spring Boot.
     * Lin Yuting - CRUD operations, REST API endpoints, and frontend
     * Manages book inventory and data.
     * Port: `8081`
-* **Service B (Borrow Service):** [Member Name]
+* **Service B (Borrow Service):**
+    * Hong fuyan – Controller, Request DTOs, pom.xml
     * Manages borrowing logic and user transactions.
     * Port: `8080`
 
