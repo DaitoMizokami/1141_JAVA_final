@@ -27,21 +27,25 @@ We are building a microservice-based application using Spring Boot.
 
 ### Step 1: Build Both Services
 
-Open terminal and run these commands:
+Open a terminal in the project root directory and build both services:
 
 ```bash
 # Build Service A (Book Service)
 cd ServiceA_BookService
 mvn -DskipTests clean package
+cd ..
 
 # Build Service B (Borrow Service)
-cd ../ServiceB_BorrowService
+cd ServiceB_BorrowService
 mvn -DskipTests clean package
+cd ..
 ```
 
-### Step 2: Start Service A
+### Step 2: Start Both Services
 
-Open a new terminal window and run:
+You need two separate terminal windows.
+
+Terminal Window 1 - Start Service A:
 
 ```bash
 cd ServiceA_BookService
@@ -50,9 +54,7 @@ java -jar target/book-service-0.0.1-SNAPSHOT.jar
 
 Wait until you see: "Tomcat started on port(s): 8081"
 
-### Step 3: Start Service B
-
-Open another new terminal window and run:
+Terminal Window 2 - Start Service B:
 
 ```bash
 cd ServiceB_BorrowService
@@ -61,7 +63,7 @@ java -jar target/borrow-service-0.0.1-SNAPSHOT.jar
 
 Wait until you see: "Tomcat started on port(s): 8080"
 
-### Step 4: Access the Application
+### Step 3: Access the Application
 
 Open your web browser and visit:
 
@@ -69,6 +71,7 @@ Open your web browser and visit:
 - Book Management: http://localhost:8081/books.html
 - Borrow Management: http://localhost:8080/borrow.html
 
+Or test API endpoints:
 Or test API endpoints:
 
 ```bash
@@ -79,7 +82,7 @@ curl http://localhost:8081/api/books
 curl http://localhost:8080/api/borrows
 ```
 
-### Step 5: Stop the Services
+### Step 4: Stop the Services
 
 To stop the services, press Ctrl+C in each terminal window.
 
@@ -219,7 +222,7 @@ Book Service (Service A):
 - Create, read, update, and delete books
 - Book status tracking (AVAILABLE or CHECKED_OUT)
 - CSV data persistence
-- MUJI-style user interface
+- Clean user interface
 - REST API with 5 endpoints
 
 Borrow Service (Service B):
@@ -228,7 +231,7 @@ Borrow Service (Service B):
 - Track overdue books
 - Automatic overdue calculation
 - CSV data persistence
-- MUJI-style user interface
+- Clean user interface
 - REST API with 8 endpoints
 - Statistics dashboard
 
