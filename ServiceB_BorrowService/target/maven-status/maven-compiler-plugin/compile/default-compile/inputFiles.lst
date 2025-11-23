@@ -1,0 +1,8 @@
+/Users/linyuting/Documents/GitHub/1141_JAVA_final/ServiceB_BorrowService/src/main/java/com/example/borrowservice/dto/BorrowRequest.java
+/Users/linyuting/Documents/GitHub/1141_JAVA_final/ServiceB_BorrowService/src/main/java/com/example/borrowservice/model/BorrowRecord.java
+/Users/linyuting/Documents/GitHub/1141_JAVA_final/ServiceB_BorrowService/src/main/java/com/example/borrowservice/repository/BorrowRecordsRepository.java
+/Users/linyuting/Documents/GitHub/1141_JAVA_final/ServiceB_BorrowService/src/main/java/com/example/borrowservice/dto/BorrowRecordDTO.java
+/Users/linyuting/Documents/GitHub/1141_JAVA_final/ServiceB_BorrowService/src/main/java/com/example/borrowservice/dto/ReturnRequest.java
+/Users/linyuting/Documents/GitHub/1141_JAVA_final/ServiceB_BorrowService/src/main/java/com/example/borrowservice/BorrowServiceApplication.java
+/Users/linyuting/Documents/GitHub/1141_JAVA_final/ServiceB_BorrowService/src/main/java/com/example/borrowservice/controller/BorrowController.java
+/Users/linyuting/Documents/GitHub/1141_JAVA_final/ServiceB_BorrowService/src/main/java/com/example/borrowservice/exception/BorrowRecordNotFoundException.java
