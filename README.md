@@ -12,9 +12,37 @@ We are building a microservice-based application using Spring Boot.
     * Port: `8081`
 * **Service B (Borrow Service):**
     * Hong fuyan – Controller, Request DTOs, pom.xml
-    * Lin Yuting - Complete borrow management system, 8 REST API endpoints,and  frontend
+    * Lin Yuting - Complete borrow management system, 8 REST API endpoints, WebClient integration, and frontend
     * Manages borrowing logic and user transactions.
     * Port: `8080`
+
+## Microservice Architecture & Service Integration
+
+### How the Services Work Together
+
+**Service A ↔ Service B Communication via Spring WebClient:**
+
+1. **Creating a Borrow Record:**
+   - User selects book in borrow.html
+   - Service B receives POST request to create borrow
+   - Service B uses WebClient to call `GET /api/books/{id}` on Service A
+   - Verifies book exists and status is AVAILABLE
+   - If available, calls `PATCH /api/books/{id}/status` to update status to CHECKED_OUT
+   - Creates borrow record in Service B's database
+
+2. **Returning a Book:**
+   - User clicks "還書" (Return) button in borrow.html
+   - Service B marks record as returned
+   - Service B automatically calls `PATCH /api/books/{id}/status` on Service A
+   - Book status changes back to AVAILABLE in Service A
+   - User sees updated availability in book management
+
+3. **Frontend Integration (borrow.html):**
+   - Dynamically loads all books from Service A on page load
+   - Book dropdown shows status (可借 = available, 已借出 = checked out)
+   - Displays full book details (title, author, status) when selected
+   - Shows book titles in borrow records table (not just IDs)
+   - All updates automatically sync between services
 
 ## Quick Start
 
@@ -130,6 +158,16 @@ DELETE /api/books/1 - Delete a book
 curl -X DELETE http://localhost:8081/api/books/1
 ```
 
+PATCH /api/books/1/status - Update book status (used by Service B via WebClient)
+
+```bash
+curl -X PATCH http://localhost:8081/api/books/1/status \
+  -H "Content-Type: application/json" \
+  -d '{"status":"CHECKED_OUT"}'
+```
+
+Note: This endpoint is primarily used by Service B to update book status when borrowing or returning books.
+
 ## Service B (Borrow Service) - Port 8080
 
 ### API Endpoints
@@ -223,17 +261,38 @@ Book Service (Service A):
 - Book status tracking (AVAILABLE or CHECKED_OUT)
 - CSV data persistence
 - Clean user interface
-- REST API with 5 endpoints
+- REST API with 6 endpoints:
+  - GET /api/books (get all books)
+  - GET /api/books/{id} (get book by ID)
+  - POST /api/books (create book)
+  - PUT /api/books/{id} (update book)
+  - DELETE /api/books/{id} (delete book)
+  - **PATCH /api/books/{id}/status** (update status only - used by Service B)
 
-Borrow Service (Service B):
+Borrow Service (Service B) - **Integrated with Service A via WebClient:**
 - Create, read, update, and delete borrow records
-- Mark books as returned
-- Track overdue books
-- Automatic overdue calculation
+- REST API with 8 endpoints:
+  - GET /api/borrows (get all records)
+  - GET /api/borrows/{id} (get by ID)
+  - GET /api/borrows/book/{bookId} (get records by book)
+  - GET /api/borrows/status/overdue (get overdue records)
+  - POST /api/borrows (create borrow - validates availability, updates book status)
+  - PUT /api/borrows/{id} (update record)
+  - **PUT /api/borrows/{id}/return** (mark returned - automatically updates book status to AVAILABLE)
+  - DELETE /api/borrows/{id} (delete record)
+- **Service-to-Service Communication:**
+  - Validates book availability before borrowing via `GET /api/books/{id}` on Service A
+  - Updates book status to CHECKED_OUT when borrowing via `PATCH /api/books/{id}/status` on Service A
+  - Updates book status to AVAILABLE when returning book via `PATCH /api/books/{id}/status` on Service A
+  - All status changes propagate automatically between services
+- **Frontend Features:**
+  - Dynamic book dropdown (loads from Service A)
+  - Shows book availability status (可借 / 已借出)
+  - Displays book details when selected
+  - Shows book titles in borrow table
+  - Statistics dashboard (total, borrowed, returned, overdue)
+- Track overdue books with automatic calculation
 - CSV data persistence
-- Clean user interface
-- REST API with 8 endpoints
-- Statistics dashboard
 
 ## Technology Stack
 
