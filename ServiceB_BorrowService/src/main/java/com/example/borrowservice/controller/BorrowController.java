@@ -126,8 +126,28 @@ public class BorrowController {
     public ResponseEntity<Void> returnBook(@PathVariable int id, @RequestParam(required = false) String returnDate) {
         LocalDate date = returnDate != null ? LocalDate.parse(returnDate) : LocalDate.now();
         
+        // First, get the borrow record to find the book ID
+        var borrowRecord = repository.findById(id)
+                .orElseThrow(() -> new BorrowRecordNotFoundException("Borrow record not found with id: " + id));
+        
+        // Mark as returned in borrow service
         boolean updated = repository.markAsReturned(id, date);
         if (updated) {
+            // Now update the book status back to AVAILABLE in Book Service
+            try {
+                Map<String, String> statusUpdate = new HashMap<>();
+                statusUpdate.put("status", "AVAILABLE");
+
+                webClient.patch()
+                        .uri(uriBuilder -> uriBuilder.path("/api/books/{id}/status").build(borrowRecord.getBookId()))
+                        .bodyValue(statusUpdate)
+                        .retrieve()
+                        .toBodilessEntity()
+                        .block();
+            } catch (Exception ex) {
+                // Log but don't fail if book status update fails
+                System.err.println("Warning: Failed to update book status to AVAILABLE: " + ex.getMessage());
+            }
             return ResponseEntity.noContent().build();
         } else {
             throw new BorrowRecordNotFoundException("Borrow record not found with id: " + id);
