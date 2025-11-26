@@ -431,12 +431,88 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8080/api/borrows';
+        const BORROW_API = 'http://localhost:8080/api/borrows';
+        const BOOK_API = 'http://localhost:8081/api/books';
         let borrowRecords = [];
+        let allBooks = [];
         let editingId = null;
 
         // Set today's date as default
         document.getElementById('borrowDate').valueAsDate = new Date();
+
+        // Load books from Service A on page load
+        function loadAvailableBooks() {
+            return fetch(BOOK_API)
+                .then(response => {
+                    if (!response.ok) throw new Error('無法載入書籍');
+                    return response.json();
+                })
+                .then(books => {
+                    allBooks = books;
+                    populateBookSelect();
+                })
+                .catch(error => {
+                    console.error('Error loading books:', error);
+                });
+        }
+
+        // Populate book selection dropdown
+        function populateBookSelect() {
+            const bookIdInput = document.getElementById('bookId');
+            const select = document.createElement('select');
+            select.id = 'bookId';
+            select.name = 'bookId';
+            select.required = true;
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '-- 選擇書籍 --';
+            select.appendChild(defaultOption);
+            
+            allBooks.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.id;
+                const status = book.status === 'AVAILABLE' ? '(可借)' : '(已借出)';
+                option.textContent = `${book.id}. ${book.title} - ${book.author} ${status}`;
+                option.disabled = book.status !== 'AVAILABLE';
+                select.appendChild(option);
+            });
+
+            select.addEventListener('change', showBookDetails);
+            
+            bookIdInput.parentElement.replaceChild(select, bookIdInput);
+        }
+
+        // Show selected book details
+        function showBookDetails(e) {
+            const bookId = e.target.value;
+            const detailsDiv = document.getElementById('bookDetails') || createBookDetailsDiv();
+            
+            if (!bookId) {
+                detailsDiv.style.display = 'none';
+                return;
+            }
+
+            const book = allBooks.find(b => b.id == bookId);
+            if (book) {
+                detailsDiv.innerHTML = `
+                    <div style="padding: 15px; background: #f5f5f0; border: 1px solid #e0e0d9; margin-top: 15px;">
+                        <strong>${book.title}</strong><br>
+                        作者: ${book.author}<br>
+                        狀態: <span style="color: ${book.status === 'AVAILABLE' ? '#2e7d32' : '#d32f2f'};">${book.status === 'AVAILABLE' ? '可借閱' : '已借出'}</span>
+                    </div>
+                `;
+                detailsDiv.style.display = 'block';
+            }
+        }
+
+        function createBookDetailsDiv() {
+            const div = document.createElement('div');
+            div.id = 'bookDetails';
+            div.style.display = 'none';
+            document.getElementById('borrowForm').insertBefore(div, document.querySelector('.form-actions'));
+            return div;
+        }
 
         // Form submission
         document.getElementById('borrowForm').addEventListener('submit', async (e) => {
@@ -450,7 +526,7 @@
             };
 
             try {
-                const response = await fetch(API_BASE, {
+                const response = await fetch(BORROW_API, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -474,7 +550,7 @@
         // Load all borrow records
         async function loadBorrowRecords() {
             try {
-                const response = await fetch(API_BASE);
+                const response = await fetch(BORROW_API);
                 if (!response.ok) {
                     throw new Error('載入失敗');
                 }
@@ -501,20 +577,23 @@
                 <thead>
                     <tr>
                         <th style="width: 8%;">編號</th>
-                        <th style="width: 12%;">書籍編號</th>
+                        <th style="width: 15%;">書籍名稱</th>
                         <th style="width: 15%;">借閱人</th>
                         <th style="width: 12%;">借閱日期</th>
                         <th style="width: 12%;">應還日期</th>
                         <th style="width: 12%;">實際還書</th>
                         <th style="width: 12%;">狀態</th>
-                        <th style="width: 17%;">操作</th>
+                        <th style="width: 14%;">操作</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${borrowRecords.map(record => `
+                    ${borrowRecords.map(record => {
+                        const book = allBooks.find(b => b.id === record.bookId);
+                        const bookTitle = book ? book.title : `書籍 #${record.bookId}`;
+                        return `
                         <tr>
                             <td>${record.id}</td>
-                            <td>${record.bookId}</td>
+                            <td>${bookTitle}</td>
                             <td>${record.borrower}</td>
                             <td>${record.borrowDate}</td>
                             <td>${record.dueDate}</td>
@@ -537,7 +616,7 @@
                                 </div>
                             </td>
                         </tr>
-                    `).join('')}
+                    `}).join('')}
                 </tbody>
             `;
 
@@ -550,7 +629,7 @@
             const today = new Date().toISOString().split('T')[0];
 
             try {
-                const response = await fetch(`${API_BASE}/${id}/return?returnDate=${today}`, {
+                const response = await fetch(`${BORROW_API}/${id}/return?returnDate=${today}`, {
                     method: 'PUT'
                 });
 
@@ -572,7 +651,7 @@
             }
 
             try {
-                const response = await fetch(`${API_BASE}/${id}`, {
+                const response = await fetch(`${BORROW_API}/${id}`, {
                     method: 'DELETE'
                 });
 
@@ -615,8 +694,8 @@
             }, 4000);
         }
 
-        // Initial load
-        loadBorrowRecords();
+        // Initial load - load books and borrow records
+        loadAvailableBooks().then(() => loadBorrowRecords());
     </script>
 </body>
 </html>
