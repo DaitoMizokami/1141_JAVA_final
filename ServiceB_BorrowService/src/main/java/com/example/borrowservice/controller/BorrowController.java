@@ -4,12 +4,18 @@ import com.example.borrowservice.dto.BorrowRecordDTO;
 import com.example.borrowservice.exception.BorrowRecordNotFoundException;
 import com.example.borrowservice.model.BorrowRecord;
 import com.example.borrowservice.repository.BorrowRecordsRepository;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/borrows")
@@ -17,9 +23,11 @@ import java.util.List;
 public class BorrowController {
 
     private final BorrowRecordsRepository repository;
+    private final WebClient webClient;
 
-    public BorrowController(BorrowRecordsRepository repository) {
+    public BorrowController(BorrowRecordsRepository repository, WebClient webClient) {
         this.repository = repository;
+        this.webClient = webClient;
     }
 
     @GetMapping
@@ -46,6 +54,44 @@ public class BorrowController {
     @PostMapping
     public ResponseEntity<BorrowRecord> createBorrow(@RequestBody BorrowRecordDTO dto) {
         validateBorrowRecordDTO(dto);
+
+        // Verify book exists and is AVAILABLE via Book Service
+        Map<String, Object> book;
+        try {
+            book = webClient.get()
+                    .uri(uriBuilder -> uriBuilder.path("/api/books/{id}").build(dto.getBookId()))
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                    .block();
+        } catch (WebClientResponseException.NotFound ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
+        } catch (WebClientResponseException ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error contacting Book Service: " + ex.getMessage());
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error contacting Book Service: " + ex.getMessage());
+        }
+
+        if (book == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
+
+        String status = (String) book.getOrDefault("status", "");
+        if (!"AVAILABLE".equals(status)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Book is not available for borrowing");
+        }
+
+        // mark book as CHECKED_OUT in Book Service via PATCH endpoint
+        try {
+            Map<String, String> statusUpdate = new HashMap<>();
+            statusUpdate.put("status", "CHECKED_OUT");
+
+            webClient.patch()
+                    .uri(uriBuilder -> uriBuilder.path("/api/books/{id}/status").build(dto.getBookId()))
+                    .bodyValue(statusUpdate)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update book status: " + ex.getMessage());
+        }
 
         BorrowRecord record = new BorrowRecord(
             0,

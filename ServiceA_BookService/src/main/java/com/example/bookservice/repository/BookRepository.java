@@ -114,6 +114,15 @@ public class BookRepository {
         return found;
     }
 
+    public Book updateStatus(int id, String status) {
+        Optional<Book> found = findById(id);
+        found.ifPresent(b -> {
+            b.setStatus(status);
+            writeBooksToFile();
+        });
+        return found.orElseThrow(() -> new RuntimeException("Book not found"));
+    }
+
     public boolean delete(int id) {
         boolean removed = bookList.removeIf(b -> b.getId() == id);
         if (removed) writeBooksToFile();

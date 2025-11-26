@@ -2,5 +2,6 @@ com/example/bookservice/controller/BookController.class
 com/example/bookservice/model/LibraryItem.class
 com/example/bookservice/exception/BookNotFoundException.class
 com/example/bookservice/repository/BookRepository.class
+com/example/bookservice/controller/BookController$StatusUpdateRequest.class
 com/example/bookservice/BookServiceApplication.class
 com/example/bookservice/model/Book.class

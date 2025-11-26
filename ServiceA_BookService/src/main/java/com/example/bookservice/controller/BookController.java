@@ -44,10 +44,31 @@ public class BookController {
                 .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + id));
     }
 
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Book> updateBookStatus(@PathVariable int id, @RequestBody StatusUpdateRequest request) {
+        try {
+            Book updated = bookRepository.updateStatus(id, request.getStatus());
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException ex) {
+            throw new BookNotFoundException("Book not found with id: " + id);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable int id) {
         boolean removed = bookRepository.delete(id);
         if (!removed) throw new BookNotFoundException("Book not found with id: " + id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Simple DTO for status update
+    public static class StatusUpdateRequest {
+        private String status;
+
+        public StatusUpdateRequest() {}
+        public StatusUpdateRequest(String status) { this.status = status; }
+
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
     }
 }

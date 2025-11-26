@@ -1,5 +1,6 @@
 com/example/borrowservice/repository/BorrowRecordsRepository.class
 com/example/borrowservice/exception/BorrowRecordNotFoundException.class
+com/example/borrowservice/controller/BorrowController$1.class
 com/example/borrowservice/dto/BorrowRecordDTO.class
 com/example/borrowservice/model/BorrowRecord.class
 com/example/borrowservice/dto/ReturnRequest.class
