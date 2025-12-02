@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖書館天氣資訊</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            background-color: #f5f5f0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            margin-bottom: 60px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0d9;
+            padding-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            color: #222;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #999;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            margin: 0 15px;
+            padding: 10px 20px;
+            color: #666;
+            text-decoration: none;
+            border: 1px solid #e0e0d9;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-links a:hover {
+            border-color: #333;
+            color: #333;
+            background-color: #f5f5f0;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border: 1px solid #e0e0d9;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0eb;
+            letter-spacing: 1px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-form input {
+            flex: 1;
+            padding: 12px 14px;
+            border: 1px solid #e0e0d9;
+            background-color: #fafaf8;
+            font-size: 13px;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        .search-form input:focus {
+            outline: none;
+            border-color: #999;
+            background-color: white;
+        }
+
+        .search-form button {
+            padding: 12px 20px;
+            border: 1px solid #333;
+            background-color: white;
+            color: #333;
+            font-size: 13px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .search-form button:hover {
+            background-color: #333;
+            color: white;
+        }
+
+        .weather-display {
+            padding: 20px 0;
+        }
+
+        .weather-location {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .weather-location h2 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #222;
+        }
+
+        .country-code {
+            padding: 4px 10px;
+            background-color: #f5f5f0;
+            border: 1px solid #e0e0d9;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid #f0f0eb;
+            margin-bottom: 20px;
+        }
+
+        .temperature {
+            font-size: 48px;
+            font-weight: 300;
+            color: #222;
+        }
+
+        .temperature span {
+            font-size: 24px;
+            color: #666;
+        }
+
+        .weather-desc {
+            text-align: right;
+        }
+
+        .weather-desc .description {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .weather-desc .feels-like {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .detail-item {
+            padding: 15px;
+            background-color: #fafaf8;
+            border: 1px solid #f0f0eb;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .library-message {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f0;
+            border: 1px solid #e0e0d9;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        .api-endpoint {
+            padding: 10px 15px;
+            background-color: #fafaf8;
+            border: 1px solid #f0f0eb;
+            margin-bottom: 10px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .error {
+            padding: 15px;
+            background-color: #fff5f5;
+            border: 1px solid #ffdddd;
+            color: #cc0000;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>圖書館天氣資訊</h1>
+            <p class="subtitle">Library Weather Service - External API Integration</p>
+            <nav class="nav-links">
+                <a href="http://localhost:8081/index.html">首頁</a>
+                <a href="http://localhost:8081/books.html">書籍管理</a>
+                <a href="http://localhost:8080/borrow.html">借閱管理</a>
+            </nav>
+        </header>
+
+        <div class="main-content">
+            <div class="section">
+                <h2 class="section-title">查詢天氣</h2>
+                <form class="search-form" onsubmit="searchWeather(event)">
+                    <input type="text" id="cityInput" placeholder="輸入城市名稱 (例: Tokyo, Taipei, Taoyuan)" value="Taoyuan">
+                    <button type="submit">查詢</button>
+                </form>
+                
+                <div id="weatherContainer" class="weather-display">
+                    <div class="loading">載入中...</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">API 端點資訊</h2>
+                <div class="api-endpoint">GET /api/weather</div>
+                <p style="font-size: 13px; color: #999; margin-bottom: 15px;">取得圖書館所在地天氣（桃園）</p>
+                
+                <div class="api-endpoint">GET /api/weather/{city}</div>
+                <p style="font-size: 13px; color: #999; margin-bottom: 15px;">取得指定城市天氣</p>
+                
+                <div class="api-endpoint">GET /api/weather/cities?names=Tokyo,Taipei</div>
+                <p style="font-size: 13px; color: #999; margin-bottom: 15px;">取得多個城市天氣</p>
+                
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0eb;">
+                    <p style="font-size: 13px; color: #999;">
+                        外部 API: OpenWeatherMap<br>
+                        整合方式: Spring WebClient
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api/weather';
+
+        async function fetchWeather(city = '') {
+            const container = document.getElementById('weatherContainer');
+            container.innerHTML = '<div class="loading">載入中...</div>';
+
+            try {
+                const url = city ? `${API_BASE}/${encodeURIComponent(city)}` : API_BASE;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!response.ok || (data.message && !data.city)) {
+                    throw new Error(data.message || '無法取得天氣資訊');
+                }
+
+                displayWeather(data);
+            } catch (error) {
+                container.innerHTML = `<div class="error">${error.message}</div>`;
+            }
+        }
+
+        function displayWeather(data) {
+            const container = document.getElementById('weatherContainer');
+            
+            container.innerHTML = `
+                <div class="weather-location">
+                    <h2>${data.city || '未知'}</h2>
+                    ${data.country ? `<span class="country-code">${data.country}</span>` : ''}
+                </div>
+                
+                <div class="weather-main">
+                    <div class="temperature">
+                        ${Math.round(data.temperature)}<span>°C</span>
+                    </div>
+                    <div class="weather-desc">
+                        <div class="description">${data.description || ''}</div>
+                        <div class="feels-like">體感溫度: ${Math.round(data.feelsLike)}°C</div>
+                    </div>
+                </div>
+                
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <div class="detail-label">濕度</div>
+                        <div class="detail-value">${data.humidity}%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">風速</div>
+                        <div class="detail-value">${data.windSpeed} m/s</div>
+                    </div>
+                </div>
+                
+                ${data.message ? `<div class="library-message">${data.message}</div>` : ''}
+            `;
+        }
+
+        function searchWeather(event) {
+            event.preventDefault();
+            const city = document.getElementById('cityInput').value.trim();
+            fetchWeather(city);
+        }
+
+        window.onload = () => fetchWeather();
+    </script>
+</body>
+</html>
