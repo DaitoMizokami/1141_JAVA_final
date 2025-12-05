@@ -149,7 +149,7 @@ http://localhost:8080/borrow.html
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                  前端應用層                            │
+│                  前端應用層                          │
 │  (HTML5 + Vanilla JavaScript + MUJI 風格設計)        │
 └───────────────────┬─────────────────────────────────┘
                     │ HTTP/REST
@@ -160,12 +160,12 @@ http://localhost:8080/borrow.html
    │BookSvc    │BorrowSvc  │/Index  │
    │Port:8081  │Port:8080  │        │
    └────┬──┘  └────┬──┘    └───┬────┘
-        │           │           │
+        │          │           │
    ┌────▼──┐  ┌────▼──┐        │
    │books  │  │borrow │        │
    │.csv   │  │.csv   │        │
    └───────┘  └───────┘        │
-                                └──── Static Files
+                               └──── Static Files
 ```
 
 ---
