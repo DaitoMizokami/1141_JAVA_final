@@ -109,6 +109,69 @@ public class BorrowController {
     public ResponseEntity<BorrowRecord> updateBorrow(@PathVariable int id, @RequestBody BorrowRecordDTO dto) {
         validateBorrowRecordDTO(dto);
 
+        // Get the existing borrow record to check if book ID changed
+        BorrowRecord existingRecord = repository.findById(id)
+            .orElseThrow(() -> new BorrowRecordNotFoundException("Borrow record not found with id: " + id));
+
+        int oldBookId = existingRecord.getBookId();
+        int newBookId = dto.getBookId();
+
+        // If book ID is different, need to update book statuses
+        if (oldBookId != newBookId) {
+            // Verify new book exists and is AVAILABLE
+            Map<String, Object> newBook;
+            try {
+                newBook = webClient.get()
+                        .uri(uriBuilder -> uriBuilder.path("/api/books/{id}").build(newBookId))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                        .block();
+            } catch (WebClientResponseException.NotFound ex) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "New book not found");
+            } catch (Exception ex) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error contacting Book Service: " + ex.getMessage());
+            }
+
+            if (newBook == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "New book not found");
+            }
+
+            String newBookStatus = (String) newBook.getOrDefault("status", "");
+            if (!"AVAILABLE".equals(newBookStatus)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "New book is not available for borrowing");
+            }
+
+            // Restore old book to AVAILABLE
+            try {
+                Map<String, String> statusUpdate = new HashMap<>();
+                statusUpdate.put("status", "AVAILABLE");
+
+                webClient.patch()
+                        .uri(uriBuilder -> uriBuilder.path("/api/books/{id}/status").build(oldBookId))
+                        .bodyValue(statusUpdate)
+                        .retrieve()
+                        .toBodilessEntity()
+                        .block();
+            } catch (Exception ex) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to restore old book status: " + ex.getMessage());
+            }
+
+            // Update new book to CHECKED_OUT
+            try {
+                Map<String, String> statusUpdate = new HashMap<>();
+                statusUpdate.put("status", "CHECKED_OUT");
+
+                webClient.patch()
+                        .uri(uriBuilder -> uriBuilder.path("/api/books/{id}/status").build(newBookId))
+                        .bodyValue(statusUpdate)
+                        .retrieve()
+                        .toBodilessEntity()
+                        .block();
+            } catch (Exception ex) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update new book status: " + ex.getMessage());
+            }
+        }
+
         BorrowRecord updated = new BorrowRecord(
             id,
             dto.getBookId(),

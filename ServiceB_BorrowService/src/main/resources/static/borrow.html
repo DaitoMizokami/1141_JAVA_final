@@ -569,6 +569,20 @@
                 
                 // リストを再読み込み
                 loadBorrowRecords();
+                
+                // 書籍状態を更新してドロップダウンを再生成（新規登録モードに戻す）
+                setTimeout(() => {
+                    fetch('http://localhost:8081/api/books')
+                        .then(res => res.json())
+                        .then(books => {
+                            allBooks = books;
+                            populateBookSelect();
+                            // 詳細表示をクリア
+                            const detailsDiv = document.getElementById('bookDetails');
+                            if(detailsDiv) detailsDiv.style.display = 'none';
+                        })
+                        .catch(error => console.error('Error reloading books:', error));
+                }, 100);
             } catch (error) {
                 showMessage('錯誤: ' + error.message, 'error');
             }
@@ -727,20 +741,54 @@
             const record = borrowRecords.find(r => r.id === id);
             if (!record) return;
 
+            // 編集モードON
+            editingId = id;
+            
+            // 書籍のドロップダウンを再生成（ただし、現在の書籍は有効にする）
+            const bookIdInput = document.getElementById('bookId');
+            const select = document.createElement('select');
+            select.id = 'bookId';
+            select.name = 'bookId';
+            select.required = true;
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '-- 選擇書籍 --';
+            select.appendChild(defaultOption);
+            
+            // ドロップダウン生成時に、現在の書籍IDは有効にする
+            allBooks.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.id;
+                const status = book.status === 'AVAILABLE' ? '(可借)' : '(已借出)';
+                option.textContent = `${book.id}. ${book.title} - ${book.author} ${status}`;
+                // 現在編集中の記録の書籍の場合は有効、そうでなく且つ貸出中の場合は無効
+                option.disabled = (book.status !== 'AVAILABLE' && book.id !== record.bookId);
+                select.appendChild(option);
+            });
+
+            select.addEventListener('change', showBookDetails);
+            
+            // 古い入力フィールドを置き換える
+            const existingSelect = document.querySelector('select#bookId');
+            if(existingSelect) {
+                existingSelect.parentElement.replaceChild(select, existingSelect);
+            } else {
+                bookIdInput.parentElement.replaceChild(select, bookIdInput);
+            }
+
             // フォームに今の値を入れる
             document.getElementById('bookId').value = record.bookId;
-            // プルダウンがあればそれも合わせる
-            const select = document.querySelector('select#bookId');
-            if(select) select.value = record.bookId;
 
             document.getElementById('borrower').value = record.borrower;
             document.getElementById('borrowDate').value = record.borrowDate;
             document.getElementById('dueDate').value = record.dueDate;
 
-            // 編集モードON
-            editingId = id;
             document.querySelector('.form-title').textContent = '編輯借閱記錄 (ID: ' + id + ')';
             document.querySelector('button[type="submit"]').textContent = '更新'; 
+            
+            // 詳細表示を更新
+            showBookDetails({target: {value: record.bookId}});
             
             // 画面の上へスクロール
             window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -1,5 +1,6 @@
-1,Java Programming,John Doe,AVAILABLE
+1,Java Programming,John Doe,CHECKED_OUT
 2,Spring Boot in Action,Craig Walls,AVAILABLE
-3,The Great Gatsby,F. Scott Fitzgerald,CHECKED_OUT
-4,Clean Code,Robert C. Martin,AVAILABLE
-6,test1,test1,CHECKED_OUT
+3,The Great Gatsby,F. Scott Fitzgerald,AVAILABLE
+4,Clean Code,Robert C. Martin,CHECKED_OUT
+6,C++,Cindy,AVAILABLE
+7,test2,123,CHECKED_OUT
